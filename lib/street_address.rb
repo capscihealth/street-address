@@ -578,7 +578,7 @@ module StreetAddress
         :fraction_regexp,
         :state_regexp,
         :city_and_state_regexp,
-        :direct_regexp, 
+        :direct_regexp,
         :zip_regexp,
         :corner_regexp,
         :unit_regexp,
@@ -609,7 +609,7 @@ module StreetAddress
       }.join("|")
     self.zip_regexp = '(\d{5})(?:-?(\d{4})?)'
     self.corner_regexp = '(?:\band\b|\bat\b|&|\@)'
-    self.unit_regexp = '(?:(su?i?te|p\W*[om]\W*b(?:ox)?|dept|apt|apartment|ro*m|fl|unit|box)\W+|(\#)\W*)([\w-]+)'
+    self.unit_regexp = '(?:(su?i?te|p\W*[om]\W*b(?:ox)?|(?:ap|dep)(?:ar)?t(?:me?nt)?|dept|apa?r?t|apartment|ro*m|flo*r?|uni?t|bu?i?ldi?n?g|ha?nga?r|lo?t|pier|slip|spa?ce?|stop|tra?i?le?r|box)(?![a-z])\W+|(\#)\W*)([\w-]+)';
     self.street_regexp =
       '(?:
           (?:(' + direct_regexp + ')\W+
@@ -905,6 +905,14 @@ module StreetAddress
           end
         end
         return s
+      end
+
+      def to_h
+        self.instance_variables.each_with_object({}) do |var_name, hash|
+          var_value = self.instance_variable_get(var_name)
+          hash_name = var_name[1..-1].to_sym
+          hash[hash_name] = var_value
+        end
       end
     end
   end
