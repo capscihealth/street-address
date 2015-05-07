@@ -209,7 +209,7 @@ class AddressTest < MiniTest::Test
   def test_line1_with_valid_addresses
     ADDRESSES.each_pair do |address, expected|
       addr = StreetAddress::US.parse(address)
-      assert_equal addr.line1, expected[:line1]
+      assert_equal expected[:line1], addr.line1
     end
   end
 
@@ -217,7 +217,7 @@ class AddressTest < MiniTest::Test
   def test_line1_with_intersections
     INTERSECTIONS.each_pair do |address, expected|
       addr = StreetAddress::US.parse(address)
-      assert_equal addr.line1, expected[:line1]
+      assert_equal expected[:line1], addr.line1
     end
   end
 
@@ -225,7 +225,7 @@ class AddressTest < MiniTest::Test
   def test_line1_with_informal_addresses
     INFORMAL_ADDRESSES.each_pair do |address, expected|
       addr = StreetAddress::US.parse_informal_address(address)
-      assert_equal addr.line1, expected[:line1]
+      assert_equal expected[:line1], addr.line1
     end
   end
 
@@ -233,7 +233,7 @@ class AddressTest < MiniTest::Test
   def test_line2_with_valid_addresses
     ADDRESSES.each_pair do |address, expected|
       addr = StreetAddress::US.parse(address)
-      assert_equal addr.line2, expected[:line2]
+      assert_equal expected[:line2], addr.line2
     end
   end
 
@@ -241,7 +241,7 @@ class AddressTest < MiniTest::Test
   def test_line2_with_intersections
     INTERSECTIONS.each_pair do |address, expected|
       addr = StreetAddress::US.parse(address)
-      assert_equal addr.line2, expected[:line2]
+      assert_equal expected[:line2], addr.line2
     end
   end
 
@@ -249,7 +249,7 @@ class AddressTest < MiniTest::Test
   def test_line2_with_informal_addresses
     INFORMAL_ADDRESSES.each_pair do |address, expected|
       addr = StreetAddress::US.parse_informal_address(address)
-      assert_equal addr.line2, expected[:line2]
+      assert_equal expected[:line2], addr.line2
     end
   end
 
@@ -259,7 +259,7 @@ class AddressTest < MiniTest::Test
       addr = StreetAddress::US.parse(address)
       expected_result = expected[:to_s]
       expected_result ||= [expected[:line1], expected[:line2]].select{|l| !l.empty?}.join(', ')
-      assert_equal addr.to_s, expected_result
+      assert_equal expected_result, addr.to_s
     end
   end
 
@@ -269,7 +269,7 @@ class AddressTest < MiniTest::Test
       addr = StreetAddress::US.parse(address)
       expected_result = expected[:to_s]
       expected_result ||= [expected[:line1], expected[:line2]].select{|l| !l.empty?}.join(', ')
-      assert_equal addr.to_s, expected_result
+      assert_equal expected_result, addr.to_s
     end
   end
 
@@ -279,7 +279,7 @@ class AddressTest < MiniTest::Test
       addr = StreetAddress::US.parse(address)
       expected_result = expected[:to_s]
       expected_result ||= [expected[:line1], expected[:line2]].select{|l| !l.empty?}.join(', ')
-      assert_equal addr.to_s, expected_result
+      assert_equal expected_result, addr.to_s
     end
   end
 
@@ -287,14 +287,14 @@ class AddressTest < MiniTest::Test
   def test_to_s_with_no_line2
     address = "45 Quaker Ave, Ste 105"
     addr = StreetAddress::US.parse(address)
-    assert_equal addr.to_s, "45 Quaker Ave Ste 105"
+    assert_equal "45 Quaker Ave Ste 105", addr.to_s
   end
 
 
   def test_to_s_with_valid_addresses_with_zip_ext
     address = "7800 Mill Station Rd Sebastopol CA 95472-1234"
     addr = StreetAddress::US.parse(address)
-    assert_equal addr.to_s, "7800 Mill Station Rd, Sebastopol, CA 95472-1234"
+    assert_equal "7800 Mill Station Rd, Sebastopol, CA 95472-1234", addr.to_s
   end
 
 
