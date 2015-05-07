@@ -61,7 +61,7 @@
     http://search.cpan.org/~sderle/Geo-StreetAddress-US-0.99/
 
 =end
-
+require 'ostruct'
 module StreetAddress
   class US
     VERSION = '1.1.0'
@@ -929,43 +929,22 @@ module StreetAddress
     the attribute street2 will be populated.
 
 =end
-    class Address
-      attr_accessor(
-        :number,
-        :street,
-        :street_type,
-        :unit,
-        :unit_prefix,
-        :suffix,
-        :prefix,
-        :city,
-        :state,
-        :postal_code,
-        :postal_code_ext,
-        :street2,
-        :street_type2,
-        :suffix2,
-        :prefix2
-      )
-
-      def initialize(args)
-        args.keys.each do |attrib|
-          self.send("#{attrib}=", args[attrib])
-        end
-        return
-      end
+    class Address < OpenStruct
 
       def state_fips
         StreetAddress::US::FIPS_STATES[state]
       end
 
+
       def state_name
         name = StreetAddress::US::STATE_NAMES[state] and name.capitalize
       end
 
+
       def intersection?
         !street2.nil?
       end
+
 
       def line1(s = "")
         if intersection?
@@ -1023,11 +1002,6 @@ module StreetAddress
         return s
       end
 
-      def to_h
-        self.instance_variables.each_with_object({}) do |var_name, hash|
-          var_value = self.instance_variable_get(var_name)
-          hash_name = var_name[1..-1].to_sym
-          hash[hash_name] = var_value
         end
       end
     end
