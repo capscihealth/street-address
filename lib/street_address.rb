@@ -62,6 +62,8 @@
 
 =end
 
+require 'ostruct'
+
 module StreetAddress
   class US
     VERSION = '1.0.6'
@@ -571,6 +573,16 @@ module StreetAddress
 
     FIPS_STATES = STATE_FIPS.invert
 
+    NORMALIZE_MAP = {
+      :prefix  => DIRECTIONAL,
+      :prefix2 => DIRECTIONAL,
+      :suffix  => DIRECTIONAL,
+      :suffix2 => DIRECTIONAL,
+      :street_type  => STREET_TYPES,
+      :street_type2 => STREET_TYPES,
+      :state   => STATE_CODES,
+    }
+
     class << self
       attr_accessor(
         :street_type_regexp,
@@ -578,7 +590,7 @@ module StreetAddress
         :fraction_regexp,
         :state_regexp,
         :city_and_state_regexp,
-        :direct_regexp, 
+        :direct_regexp,
         :zip_regexp,
         :corner_regexp,
         :unit_regexp,
@@ -590,13 +602,20 @@ module StreetAddress
     end
 
     self.street_type_regexp = STREET_TYPES_LIST.keys.join("|")
-    self.number_regexp = '\d+-?\d*'
+    # we don't include letters in the number regex because we want to
+    # treat "42S" as "42 S" (42 South). For example,
+    # Utah and Wisconsin have a more elaborate system of block numbering
+    # http://en.wikipedia.org/wiki/House_number#Block_numbers
+    self.number_regexp = '(?<number>\d+-?\d*)'
     self.fraction_regexp = '\d+\/\d+'
+
+    # escape spaces in state names (e.g., "new york" --> "new\\ york")
+    # so they still match in the x environment below
     self.state_regexp = STATE_CODES.to_a.join("|").gsub(/ /, "\\s")
     self.city_and_state_regexp = '
       (?:
-        ([^\d,]+?)\W+
-        (' + state_regexp + ')
+        (?<city>([^\d,]+?))\W+
+        (?<state>' + state_regexp + ')
       )'
 
     self.direct_regexp = DIRECTIONAL.keys.join("|") +
@@ -607,34 +626,78 @@ module StreetAddress
         f = x.gsub(/(\w)/, '\1.')
         [Regexp::quote(f), Regexp::quote(x)]
       }.join("|")
-    self.zip_regexp = '(\d{5})(?:-?(\d{4})?)'
+
+    self.zip_regexp = '(?<zip>\d{5})(?:-?(?<zip_ext>\d{4})?)'
     self.corner_regexp = '(?:\band\b|\bat\b|&|\@)'
-    self.unit_regexp = '(?:(su?i?te|p\W*[om]\W*b(?:ox)?|dept|apt|apartment|ro*m|fl|unit|box)\W+|(\#)\W*)([\w-]+)'
-    self.street_regexp =
-      '(?:
-          (?:(' + direct_regexp + ')\W+
-          (' + street_type_regexp + ')\b)
-          |
-          (?:(' + direct_regexp + ')\W+)?
-          (?:
-            ([^,]+)
-            (?:[^\w,]+(' + street_type_regexp + ')\b)
-            (?:[^\w,]+(' + direct_regexp + ')\b)?
-           |
-            ([^,]*\d)
-            (' + direct_regexp + ')\b
-           |
-            ([^,]+?)
-            (?:[^\w,]+(' + street_type_regexp + ')\b)?
-            (?:[^\w,]+(' + direct_regexp + ')\b)?
-          )
-        )'
+    # http://pe.usps.com/text/pub28/pub28c2_003.htm
+    # TODO add support for those that don't require a number
+    # TODO map to standard names/abbreviations
+    unit_numbered_regexp = '(?<unit_type>su?i?te
+        |p\W*[om]\W*b(?:ox)?
+        |(?:ap|dep)(?:ar)?t(?:me?nt)?
+        |dept
+        |apa?r?t
+        |apartment
+        |ro*m
+        |flo*r?
+        |uni?t
+        |bu?i?ldi?n?g
+        |ha?nga?r
+        |lo?t
+        |pier
+        |slip
+        |spa?ce?
+        |stop
+        |tra?i?le?r
+        |box)(?![a-z])';
+
+    unit_unnumbered_regexp = '(?<unit_type>ba?se?me?n?t
+        |fro?nt
+        |lo?bby
+        |lowe?r
+        |off?i?ce?
+        |pe?n?t?ho?u?s?e?
+        |rear
+        |side
+        |uppe?r
+        )\b'
+
+    self.unit_regexp = '(?:
+      (?:
+        (?:
+          (?:' + unit_numbered_regexp + ' \W*)
+          | (?<unit_type>\#\W*)
+        )
+        (?<unit_number>[\w-]+)
+      ) |
+      ' + unit_unnumbered_regexp + ')'
+
+
+    self.street_regexp ='(?:
+        (?:(?<street>' + direct_regexp + ')\W+
+           (?<type>' + street_type_regexp + ')\b)
+        |
+        (?:(?<prefix>' + direct_regexp + ')\W+)?
+        (?:
+          (?<street>[^,]*\d)
+          (?:[^\w,]*(?<suffix>' + direct_regexp + ')\b)
+         |
+          (?<street>[^,]+)
+          (?:[^\w,]+(?<type>' + street_type_regexp + ')\b)
+          (?:[^\w,]+(?<suffix>' + direct_regexp + ')\b)?
+         |
+          (?<street>[^,]+?)
+          (?:[^\w,]+(?<type>' + street_type_regexp + ')\b)?
+          (?:[^\w,]+(?<suffix>' + direct_regexp + ')\b)?
+        )
+      )'
+
     self.place_regexp =
       '(?:' + city_and_state_regexp + '\W*)?
        (?:' + zip_regexp + ')?'
 
     self.address_regexp =
-      '\A[^\w\#]*
+      '\A[^\w\x23]*
         (' + number_regexp + ')\W*
         (?:' + fraction_regexp + '\W*)?' +
         street_regexp + '\W+
@@ -645,11 +708,12 @@ module StreetAddress
     self.informal_address_regexp =
       '\A\s*
         (?:' + unit_regexp + '(?:\W+|\Z))?
-        (' + number_regexp + ')\W*
+        ' + number_regexp + '\W*
         (?:' + fraction_regexp + '\W*)?' +
         street_regexp + '(?:[^\#\w]+|\Z)
         (?:' + unit_regexp + '(?:\W+|\Z))?' +
         '(?:' + place_regexp + ')?'
+
 
 =begin rdoc
 
@@ -696,19 +760,32 @@ module StreetAddress
 
         return unless match = regex.match(inter)
 
+        # if we've a type2 and type1 is either missing or the same,
+        # and the type seems plural,
+        # and is still valid if the trailing 's' is removed, then remove it.
+        # So "X & Y Streets" becomes "X Street" and "Y Street".
+        type1 = match[2] || match[7]
+        type2 = match[13] || match[18]
+        if type2 && (!type1 or type1 == type2)
+          type_regex = Regexp.new(street_type_regexp, Regexp::IGNORECASE + Regexp::EXTENDED)
+          if type2.sub!(/s\W*$/i, '') && type2 =~ type_regex
+            type1 = type2
+          end
+        end
+
         normalize_address(
           StreetAddress::US::Address.new(
-            :street => match[4] || match[9],
-            :street_type => match[5],
-            :suffix => match[6],
-            :prefix => match[3],
-            :street2 => match[15] || match[20],
-            :street_type2 => match[16],
+            :street => match[6] || match[9],
+            :street_type => type1,
+            :suffix => match[:suffix],
+            :prefix => match[:prefix],
+            :street2 => match[17] || match[20],
+            :street_type2 => type2,
             :suffix2 => match[17],
             :prefix2 => match[14],
-            :city => match[23],
-            :state => match[24],
-            :postal_code => match[25]
+            :city => match[:city],
+            :state => match[:state],
+            :postal_code => match[:zip],
           )
         )
       end
@@ -727,20 +804,19 @@ module StreetAddress
          regex = Regexp.new(address_regexp, Regexp::IGNORECASE + Regexp::EXTENDED)
 
          return unless match = regex.match(addr)
-
          normalize_address(
            StreetAddress::US::Address.new(
-           :number => match[1],
-           :street => match[5] || match[10] || match[2],
-           :street_type => match[6] || match[3],
-           :unit => match[15],
-           :unit_prefix => match[13] || match[14],
-           :suffix => match[7] || match[12],
-           :prefix => match[4],
-           :city => match[16],
-           :state => match[17],
-           :postal_code => match[18],
-           :postal_code_ext => match[19]
+           :number => match[:number],
+           :street => match[:street],
+           :street_type => match[:type],
+           :unit => match[:unit_number],
+           :unit_prefix => match[:unit_type],
+           :suffix => match[:suffix],
+           :prefix => match[:prefix],
+           :city => match[:city],
+           :state => match[:state],
+           :postal_code => match[:zip],
+           :postal_code_ext => match[:zip_ext]
            )
         )
       end
@@ -752,57 +828,58 @@ module StreetAddress
 
          normalize_address(
            StreetAddress::US::Address.new(
-           :number => match[4],
-           :street => match[8] || match[13] || match[5],
-           :street_type => match[9] || match[6],
-           :unit => match[18] || match[3],
-           :unit_prefix => match[16] || match[17] || match[1] || match[2],
-           :suffix => match[10] || match[15],
-           :prefix => match[7],
-           :city => match[19],
-           :state => match[20],
-           :postal_code => match[21],
-           :postal_code_ext => match[22]
+           :number => match[:number],
+           :street => match[:street],
+           :street_type => match[:type],
+           :unit => match[:unit_number],
+           :unit_prefix => match[:unit_type],
+           :suffix => match[:suffix],
+           :prefix => match[:prefix],
+           :city => match[:city],
+           :state => match[:state],
+           :postal_code => match[:zip],
+           :postal_code_ext => match[:zip_ext]
            )
         )
       end
 
       private
       def normalize_address(addr)
-        addr.state = normalize_state(addr.state) unless addr.state.nil?
-        addr.street_type = normalize_street_type(addr.street_type) unless addr.street_type.nil?
-        addr.prefix = normalize_directional(addr.prefix) unless addr.prefix.nil?
-        addr.suffix = normalize_directional(addr.suffix) unless addr.suffix.nil?
-        addr.street.gsub!(/\b([a-z])/) {|wd| wd.capitalize} unless addr.street.nil?
-        addr.street_type2 = normalize_street_type(addr.street_type2) unless addr.street_type2.nil?
-        addr.prefix2 = normalize_directional(addr.prefix2) unless addr.prefix2.nil?
-        addr.suffix2 = normalize_directional(addr.suffix2) unless addr.suffix2.nil?
-        addr.street2.gsub!(/\b([a-z])/) {|wd| wd.capitalize} unless addr.street2.nil?
-        addr.city.gsub!(/\b([a-z])/) {|wd| wd.capitalize} unless addr.city.nil?
-        addr.unit_prefix.capitalize! unless addr.unit_prefix.nil?
+        # strip off some punctuation
+        addr.each_pair do |key, value|
+          next unless value
+          value.gsub!(/^\s+|\s+$|[^\w\s\-\#\&]/o, '')
+          value.strip!
+        end
+
+        addr.street_type ||= begin
+          type_regex = Regexp.new('[^\w,]+(?<type>' + street_type_regexp + ')[^\w,]+', Regexp::IGNORECASE + Regexp::EXTENDED)
+          addr.street.match(type_regex) do |match|
+            addr[:street_type] = match[:type]
+          end
+        end
+
+        NORMALIZE_MAP.each_pair do |key, map|
+          next unless addr[key]
+          mapping = map[addr[key].downcase]
+          addr[key] = mapping if mapping
+        end
+
+        # attempt to expand directional prefixes on place names
+        addr.city = normalize_to_directional(addr.city) if addr.city
+
+        %w(street street_type street2 street_type2 city unit_prefix).each do |k|
+          addr[k] = addr[k].split.map(&:capitalize).join(' ') if addr[k]
+        end
+
         return addr
       end
 
-      def normalize_state(state)
-        if state.length < 3
-          state.upcase
-        else
-          STATE_CODES[state.downcase]
+      def normalize_to_directional(str)
+        DIRECTION_CODES.each_pair do |abbr, full|
+          str.gsub!(/^#{abbr}\.?\s+(\w+)/i, full + ' \1')
         end
-      end
-
-      def normalize_street_type(s_type)
-        s_type.downcase!
-        s_type = STREET_TYPES[s_type] || s_type if STREET_TYPES_LIST[s_type]
-        s_type.capitalize
-      end
-
-      def normalize_directional(dir)
-        if dir.length < 3
-          dir.upcase
-        else
-          DIRECTIONAL[dir.downcase]
-        end
+        str
       end
     end
 
@@ -813,32 +890,7 @@ module StreetAddress
     the attribute street2 will be populated.
 
 =end
-    class Address
-      attr_accessor(
-        :number,
-        :street,
-        :street_type,
-        :unit,
-        :unit_prefix,
-        :suffix,
-        :prefix,
-        :city,
-        :state,
-        :postal_code,
-        :postal_code_ext,
-        :street2,
-        :street_type2,
-        :suffix2,
-        :prefix2
-      )
-
-      def initialize(args)
-        args.keys.each do |attrib|
-          self.send("#{attrib}=", args[attrib])
-        end
-        return
-      end
-
+    class Address < OpenStruct
       def state_fips
         StreetAddress::US::FIPS_STATES[state]
       end
@@ -906,6 +958,7 @@ module StreetAddress
         end
         return s
       end
+
     end
   end
 end
