@@ -24,11 +24,11 @@ class AddressTest < MiniTest::Test
       :line2 => "Sebastopol, CA"
     },
     "1005 N Gravenstein Highway, Suite 500, Sebastopol, CA" => {
-      :line1 => "1005 N Gravenstein Hwy Suite 500",
+      :line1 => "1005 N Gravenstein Hwy Ste 500",
       :line2 => "Sebastopol, CA"
     },
     "1005 N Gravenstein Hwy Suite 500 Sebastopol, CA" => {
-      :line1 => "1005 N Gravenstein Hwy Suite 500",
+      :line1 => "1005 N Gravenstein Hwy Ste 500",
       :line2 => "Sebastopol, CA"
     },
     "1005 N Gravenstein Highway, Sebastopol, CA, 95472" => {
@@ -108,7 +108,7 @@ class AddressTest < MiniTest::Test
       :line2 => "East San Jose, CA"
     },
     "lt42 99 Some Road, Some City LA" => {
-      :line1 => "99 Some Rd Lt 42",
+      :line1 => "99 Some Rd Lot 42",
       :line2 => "Some City, LA"
     },
     "36401 County Road 43, Eaton, CO 80615" => {
@@ -132,7 +132,7 @@ class AddressTest < MiniTest::Test
       :line2 => "Arlington, VA 22206"
     },
     "44 Canal Center Plaza Suite 500, Alexandria, VA 22314" => {
-      :line1 => "44 Canal Center Plz Suite 500",
+      :line1 => "44 Canal Center Plz Ste 500",
       :line2 => "Alexandria, VA 22314"
     }
   }
@@ -196,7 +196,7 @@ class AddressTest < MiniTest::Test
       :line2 => ""
     },
     "233 S Wacker Dr lobby 60606" => {
-      :line1 => "233 S Wacker Dr Lobby",
+      :line1 => "233 S Wacker Dr Lbby",
       :line2 => "60606"
     }
     #FIXME
