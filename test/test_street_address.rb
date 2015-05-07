@@ -11,6 +11,14 @@ class StreetAddressUsTest < Test::Unit::TestCase
       :postal_code => '95472',
       :street_type => 'Hwy',
     },
+    "100 South Street New York City NY 10023" => {
+      :number=>"100",
+      :street=>"South",
+      :street_type=>"St",
+      :city=>"New York City",
+      :state=>"NY",
+      :postal_code=>"10023"
+      },
     "1005 Gravenstein Hwy, 95472" => {
       :number => '1005',
       :street => 'Gravenstein',
@@ -93,13 +101,20 @@ class StreetAddressUsTest < Test::Unit::TestCase
       :suffix => 'N',
       :street_type => 'Hwy',
     },
-    # "1005 Gravenstein Hwy, N Sebastopol CA" => {
-    #   :number => '1005',
-    #   :street => 'Gravenstein',
-    #   :state => 'CA',
-    #   :city => 'North Sebastopol',
-    #   :street_type => 'Hwy',
-    # },
+    "1005 Gravenstein Hwy, N Sebastopol CA" => {
+      :number => '1005',
+      :street => 'Gravenstein',
+      :state => 'CA',
+      :city => 'North Sebastopol',
+      :street_type => 'Hwy',
+    },
+    "1005 Gravenstein Hwy, N. Sebastopol CA" => {
+      :number => '1005',
+      :street => 'Gravenstein',
+      :state => 'CA',
+      :city => 'North Sebastopol',
+      :street_type => 'Hwy',
+    },
     "1005 Gravenstein Hwy, North Sebastopol CA" => {
       :number => '1005',
       :street => 'Gravenstein',
@@ -137,14 +152,14 @@ class StreetAddressUsTest < Test::Unit::TestCase
       :postal_code => '95472',
       :street_type => 'Rd',
     },
-    # "1005 State Highway 116 Sebastopol CA 95472" => {
-    #   :number => '1005',
-    #   :street => 'State Highway 116',
-    #   :state => 'CA',
-    #   :city => 'Sebastopol',
-    #   :postal_code => '95472',
-    #   :street_type => 'Hwy',
-    # },
+    "1005 State Highway 116 Sebastopol CA 95472" => {
+      :number => '1005',
+      :street => 'State Highway 116',
+      :state => 'CA',
+      :city => 'Sebastopol',
+      :postal_code => '95472',
+      :street_type => 'Hwy',
+    },
     "1600 Pennsylvania Ave. Washington DC" => {
       :number => '1600',
       :street => 'Pennsylvania',
@@ -159,15 +174,15 @@ class StreetAddressUsTest < Test::Unit::TestCase
       :city => 'Washington',
       :street_type => 'Ave',
     },
-    # "48S 400E, Salt Lake City UT" => {
-    #   :street_type => nil,
-    #   :number => '48',
-    #   :street => '400',
-    #   :state => 'UT',
-    #   :city => 'Salt Lake City',
-    #   :suffix => 'E',
-    #   :prefix => 'S'
-    # },
+    "48S 400E, Salt Lake City UT" => {
+      :street_type => nil,
+      :number => '48',
+      :street => '400',
+      :state => 'UT',
+      :city => 'Salt Lake City',
+      :suffix => 'E',
+      :prefix => 'S'
+    },
     "550 S 400 E #3206, Salt Lake City UT 84111" => {
       :number => '550',
       :street => '400',
@@ -180,18 +195,18 @@ class StreetAddressUsTest < Test::Unit::TestCase
       :unit_prefix => '#',
       :prefix => 'S'
     },
-    # "6641 N 2200 W Apt D304 Park City, UT 84098" => {
-    #   :number => '6641',
-    #   :street => '2200',
-    #   :state => 'UT',
-    #   :unit => 'D304',
-    #   :postal_code => '84098',
-    #   :city => 'Park City',
-    #   :suffix => 'W',
-    #   :street_type => nil,
-    #   :unit_prefix => 'Apt',
-    #   :prefix => 'N'
-    # },
+    "6641 N 2200 W Apt D304 Park City, UT 84098" => {
+      :number => '6641',
+      :street => '2200',
+      :state => 'UT',
+      :unit => 'D304',
+      :postal_code => '84098',
+      :city => 'Park City',
+      :suffix => 'W',
+      :street_type => nil,
+      :unit_prefix => 'Apt',
+      :prefix => 'N'
+    },
     "100 South St, Philadelphia, PA" => {
       :number => '100',
       :street => 'South',
@@ -199,14 +214,14 @@ class StreetAddressUsTest < Test::Unit::TestCase
       :city => 'Philadelphia',
       :street_type => 'St',
     },
-    # "100 S.E. Washington Ave, Minneapolis, MN" => {
-    #   :number => '100',
-    #   :street => 'Washington',
-    #   :state => 'MN',
-    #   :city => 'Minneapolis',
-    #   :street_type => 'Ave',
-    #   :prefix => 'SE'
-    # },
+    "100 S.E. Washington Ave, Minneapolis, MN" => {
+      :number => '100',
+      :street => 'Washington',
+      :state => 'MN',
+      :city => 'Minneapolis',
+      :street_type => 'Ave',
+      :prefix => 'SE'
+    },
     "3813 1/2 Some Road, Los Angeles, CA" => {
       :number => '3813',
       :street => 'Some',
@@ -214,13 +229,13 @@ class StreetAddressUsTest < Test::Unit::TestCase
       :city => 'Los Angeles',
       :street_type => 'Rd',
     },
-    # "1 First St, e San Jose CA" => { # lower case city direction
-    #   :number => '1',
-    #   :street => 'First',
-    #   :state => 'CA',
-    #   :city => 'East San Jose',
-    #   :street_type => 'St',
-    # },
+    "1 First St, e San Jose CA" => { # lower case city direction
+      :number => '1',
+      :street => 'First',
+      :state => 'CA',
+      :city => 'East San Jose',
+      :street_type => 'St',
+    },
     "123 Maple Rochester, New York" => { # space in state name
       :street_type => nil,
       :number => '123',
@@ -251,24 +266,23 @@ class StreetAddressUsTest < Test::Unit::TestCase
     #   :street_type => 'Rd',
     #   :state => 'LA'
     # },
-    # "36401 County Road 43, Eaton, CO 80615" => { # numbered County Road
-    #   :city => 'Eaton',
-    #   :postal_code => '80615',
-    #   :number => '36401',
-    #   :street => 'County Road 43',
-    #   :street_type => 'Rd',
-    #   :state => 'CO'
-    # },
-    # "1234 COUNTY HWY 60E, Town, CO 12345" => {
-    #   :city => 'Town',
-    #   :postal_code => '12345',
-    #   :number => '1234',
-    #   :street => 'COUNTY HWY 60',
-    #   :suffix => 'E',
-    #   :street_type => nil,  # ?
-    #   :state => 'CO'
-    # },
-
+    "36401 County Road 43, Eaton, CO 80615" => { # numbered County Road
+      :city => 'Eaton',
+      :postal_code => '80615',
+      :number => '36401',
+      :street => 'County Road 43',
+      :street_type => 'Rd',
+      :state => 'CO'
+    },
+    "1234 COUNTY HWY 60E, Town, CO 12345" => {
+      :city => 'Town',
+      :postal_code => '12345',
+      :number => '1234',
+      :street => 'County Hwy 60',
+      :suffix => 'E',
+      :street_type => 'Hwy',
+      :state => 'CO'
+    },
     "'45 Quaker Ave, Ste 105'" => { # RT#73397
       :number => '45',
       :street => 'Quaker',
@@ -385,30 +399,30 @@ class StreetAddressUsTest < Test::Unit::TestCase
       :city => 'San Francisco',
       :street2 => 'Valencia'
     },
-    # "Mission and Valencia Sts San Francisco CA" => {
-    #   :street_type => 'St',
-    #   :street_type2 => 'St',
-    #   :street => 'Mission',
-    #   :state => 'CA',
-    #   :city => 'San Francisco',
-    #   :street2 => 'Valencia'
-    # },
-    # "Mission & Valencia Sts. San Francisco CA" => {
-    #   :street_type => 'St',
-    #   :street_type2 => 'St',
-    #   :street => 'Mission',
-    #   :state => 'CA',
-    #   :city => 'San Francisco',
-    #   :street2 => 'Valencia'
-    # },
-    # "Mission & Valencia Streets San Francisco CA" => {
-    #   :street_type => 'St',
-    #   :street_type2 => 'St',
-    #   :street => 'Mission',
-    #   :state => 'CA',
-    #   :city => 'San Francisco',
-    #   :street2 => 'Valencia'
-    # },
+    "Mission and Valencia Sts San Francisco CA" => {
+      :street_type => 'St',
+      :street_type2 => 'St',
+      :street => 'Mission',
+      :state => 'CA',
+      :city => 'San Francisco',
+      :street2 => 'Valencia'
+    },
+    "Mission & Valencia Sts. San Francisco CA" => {
+      :street_type => 'St',
+      :street_type2 => 'St',
+      :street => 'Mission',
+      :state => 'CA',
+      :city => 'San Francisco',
+      :street2 => 'Valencia'
+    },
+    "Mission & Valencia Streets San Francisco CA" => {
+      :street_type => 'St',
+      :street_type2 => 'St',
+      :street => 'Mission',
+      :state => 'CA',
+      :city => 'San Francisco',
+      :street2 => 'Valencia'
+    },
     "Mission Avenue and Valencia Street San Francisco CA" => {
       :street_type => 'Ave',
       :street_type2 => 'St',
@@ -458,29 +472,29 @@ class StreetAddressUsTest < Test::Unit::TestCase
       :city=>nil,
       :state=>nil,
       :postal_code=>nil
-    }
+    },
     # "321 S. Washington" => { # RT#82146
     #   :street_type => nil,
     #   :prefix => 'S',
     #   :street => 'Washington',
     #   :number => '321'
     # },
-    # "233 S Wacker Dr lobby 60606" => { # unnumbered secondary unit type
-    #   :number => '233',
-    #   :street => 'Wacker',
-    #   :postal_code => '60606',
-    #   :street_type => 'Dr',
-    #   :prefix => 'S',
-    #   :unit_prefix => 'lobby',
-    # },
-    # "(233 S Wacker Dr lobby 60606)" => { # surrounding punctuation
-    #   :number => '233',
-    #   :street => 'Wacker',
-    #   :postal_code => '60606',
-    #   :street_type => 'Dr',
-    #   :prefix => 'S',
-    #   :unit_prefix => 'lobby',
-    # }
+    "233 S Wacker Dr lobby 60606" => { # unnumbered secondary unit type
+      :number => '233',
+      :street => 'Wacker',
+      :postal_code => '60606',
+      :street_type => 'Dr',
+      :prefix => 'S',
+      :unit_prefix => 'Lobby',
+    },
+    "(233 S Wacker Dr lobby 60606)" => { # surrounding punctuation
+      :number => '233',
+      :street => 'Wacker',
+      :postal_code => '60606',
+      :street_type => 'Dr',
+      :prefix => 'S',
+      :unit_prefix => 'Lobby',
+    }
   }
 
 
@@ -498,8 +512,8 @@ class StreetAddressUsTest < Test::Unit::TestCase
   def test_address_parsing
     ADDRESSES.each_pair do |address, expected|
       addr = StreetAddress::US.parse(address)
-      assert_equal addr.intersection?, false
       compare_expected_to_actual_hash(expected, addr.to_h, address)
+      assert_equal addr.intersection?, false
     end
   end
 
@@ -514,8 +528,9 @@ class StreetAddressUsTest < Test::Unit::TestCase
   def test_intersection_address_parsing
     INTERSECTIONS.each_pair do |address, expected|
       addr = StreetAddress::US.parse(address)
-      assert_equal addr.intersection?, true
+
       compare_expected_to_actual_hash(expected, addr.to_h, address)
+      assert_equal addr.intersection?, true
     end
   end
 
@@ -525,21 +540,6 @@ class StreetAddressUsTest < Test::Unit::TestCase
       parsed_address = StreetAddress::US.parse(address)
       assert_nil parsed_address
     end
-  end
-
-
-  def test_street_type_is_nil_for_road_redundant_street_types
-    address = "36401 County Road 43, Eaton, CO 80615"
-    expected_results = {
-      :number => '36401',
-      :street => 'County Road 43',
-      :city   => 'Eaton',
-      :state  => 'CO',
-      :postal_code => '80615',
-      :street_type => nil
-    }
-    parsed_address = StreetAddress::US.parse(address)
-    compare_expected_to_actual_hash(expected_results, parsed_address.to_h)
   end
 
 
@@ -611,7 +611,7 @@ class StreetAddressUsTest < Test::Unit::TestCase
 
   def compare_expected_to_actual_hash(expected, actual, address)
     expected.each_pair do |expected_key, expected_value|
-      assert_equal actual[expected_key], expected_value, "For address '#{address}',  #{actual[expected_key]} != #{expected_value}"
+      assert_equal expected_value, actual[expected_key], "For address '#{address}',  #{actual[expected_key]} != #{expected_value}"
     end
   end
 
