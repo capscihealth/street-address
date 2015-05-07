@@ -44,7 +44,7 @@ class StreetAddressUsTest < MiniTest::Test
       :city => 'Sebastopol',
       :street_type => 'Hwy',
       :prefix => 'N',
-      :unit_prefix => 'Suite',
+      :unit_prefix => 'Ste',
       :unit => '500',
     },
     "1005 N Gravenstein Hwy Suite 500 Sebastopol, CA" => {
@@ -54,7 +54,7 @@ class StreetAddressUsTest < MiniTest::Test
       :city => 'Sebastopol',
       :street_type => 'Hwy',
       :prefix => 'N',
-      :unit_prefix => 'Suite',
+      :unit_prefix => 'Ste',
       :unit => '500',
     },
     "1005 N Gravenstein Highway, Sebastopol, CA, 95472" => {
@@ -247,7 +247,7 @@ class StreetAddressUsTest < MiniTest::Test
       :city => 'Some City',
       :number => '99',
       :street => 'Some',
-      :unit_prefix => 'Lt',
+      :unit_prefix => 'Lot',
       :street_type => 'Rd',
       :state => 'LA'
     },
@@ -297,7 +297,7 @@ class StreetAddressUsTest < MiniTest::Test
       :street => "Canal Center",
       :street_type => "Plz",
       :unit => "500",
-      :unit_prefix => "Suite",
+      :unit_prefix => "Ste",
       :city => "Alexandria",
       :street2 => nil
     },
@@ -470,7 +470,7 @@ class StreetAddressUsTest < MiniTest::Test
       :postal_code => '60606',
       :street_type => 'Dr',
       :prefix => 'S',
-      :unit_prefix => 'Lobby',
+      :unit_prefix => 'Lbby',
     },
     "(233 S Wacker Dr lobby 60606)" => { # surrounding punctuation
       :number => '233',
@@ -478,7 +478,7 @@ class StreetAddressUsTest < MiniTest::Test
       :postal_code => '60606',
       :street_type => 'Dr',
       :prefix => 'S',
-      :unit_prefix => 'Lobby',
+      :unit_prefix => 'Lbby',
     }
   }
 
