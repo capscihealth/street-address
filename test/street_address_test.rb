@@ -226,13 +226,6 @@ class StreetAddressUsTest < MiniTest::Test
       :city => 'East San Jose',
       :street_type => 'St',
     },
-    "1 1st St, E. San Jose CA" => {
-      :number => '1',
-      :street => '1st',
-      :state => 'CA',
-      :city => 'East San Jose',
-      :street_type => 'St',
-    },
     "1 ninth pine ave, E. San Jose CA" => {
       :number => '1',
       :street => '9th Pine',
