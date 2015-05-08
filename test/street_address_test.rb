@@ -226,6 +226,21 @@ class StreetAddressUsTest < MiniTest::Test
       :city => 'East San Jose',
       :street_type => 'St',
     },
+    "1 ninth pine ave, E. San Jose CA" => {
+      :number => '1',
+      :street => '9th Pine',
+      :state => 'CA',
+      :city => 'East San Jose',
+      :street_type => 'Ave',
+    },
+    "1 Ninthian St, E. San Jose CA" => { # don't overparse numerical street names
+      :number => '1',
+      :street => 'Ninthian',
+      :state => 'CA',
+      :city => 'East San Jose',
+      :street_type => 'St',
+    },
+
     "123 Maple Rochester, New York" => { # space in state name
       :street_type => nil,
       :number => '123',
