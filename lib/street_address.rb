@@ -452,16 +452,22 @@ module StreetAddress
     #http://pe.usps.gov/cpim/ftp/pubs/Pub28/pub28.pdf
     #appendix 6: business abbreviations
     STREET_NAME_ABBREVIATIONS = {
-      /first/i   => '1st',
-      /second/i  => '2nd',
-      /third/i   => '3rd',
-      /fourth/i  => '4th',
-      /fifth/i   => '5th',
-      /sixth/i   => '6th',
-      /seventh/i => '7th',
-      /eight/i   => '8th',
-      /ninth/i   => '9th',
+      'first'   => '1st',
+      'second'  => '2nd',
+      'third'   => '3rd',
+      'fourth'  => '4th',
+      'fifth'   => '5th',
+      'sixth'   => '6th',
+      'seventh' => '7th',
+      'eight'   => '8th',
+      'ninth'   => '9th',
     }
+    keys = STREET_NAME_ABBREVIATIONS.keys
+    keys.each do |key|
+      val = STREET_NAME_ABBREVIATIONS.delete(key)
+      new_key = /\b#{key}\b/i
+      STREET_NAME_ABBREVIATIONS[new_key] = val
+    end
 
 
     UNIT_ABBREVIATIONS_NUMBERED = {
