@@ -22,6 +22,13 @@ class StreetAddressUsTest < MiniTest::Test
       :suffix => 'N',
       :street_type => 'Hwy',
     },
+    "1005 gravenstein hwy n, 95472" => {
+      :number => '1005',
+      :street => 'Gravenstein',
+      :postal_code => '95472',
+      :suffix => 'N',
+      :street_type => 'Hwy',
+    },
     "1005 Gravenstein Highway North, 95472" => {
       :number => '1005',
       :street => 'Gravenstein',
@@ -30,6 +37,14 @@ class StreetAddressUsTest < MiniTest::Test
       :street_type => 'Hwy',
     },
     "1005 N Gravenstein Highway, Sebastopol, CA" => {
+      :number => '1005',
+      :street => 'Gravenstein',
+      :state => 'CA',
+      :city => 'Sebastopol',
+      :street_type => 'Hwy',
+      :prefix => 'N'
+    },
+    "1005 n gravenstein highway, sebastopol, ca" => {
       :number => '1005',
       :street => 'Gravenstein',
       :state => 'CA',
@@ -437,6 +452,26 @@ class StreetAddressUsTest < MiniTest::Test
       :state => 'CA',
       :city => 'San Francisco',
       :street2 => 'Valencia'
+    },
+    "north mission ave and South valencia street san francisco ca" => {
+      :street_type => 'Ave',
+      :prefix => 'N',
+      :street_type2 => 'St',
+      :prefix2 => 'S',
+      :street => 'Mission',
+      :state => 'CA',
+      :city => 'San Francisco',
+      :street2 => 'Valencia'
+    },
+    "mission ave N and valencia street east san francisco ca" => {
+      :street_type => 'Ave',
+      :suffix => 'N',
+      :street_type2 => 'St',
+      :suffix2 => 'E',
+      :street => 'Mission',
+      :state => 'CA',
+      :city => 'San Francisco',
+      :street2 => 'Valencia'
     }
   }
 
@@ -569,10 +604,12 @@ class StreetAddressUsTest < MiniTest::Test
     assert_equal "3333", addr.postal_code_ext
   end
 
+
   def test_zip_plus_4_without_dash
     addr = StreetAddress::US.parse("2730 S Veitch St, Arlington, VA 222064444")
     assert_equal "4444", addr.postal_code_ext
   end
+
 
   def test_informal_parse_normal_address
     a = StreetAddress::US.parse("2730 S Veitch St, Arlington, VA 222064444", informal: true)
@@ -586,6 +623,7 @@ class StreetAddressUsTest < MiniTest::Test
     assert_equal "4444", a.postal_code_ext
   end
 
+
   def test_informal_parse_informal_address
     a = StreetAddress::US.parse("2730 S Veitch St", informal: true)
     assert_equal "2730", a.number
@@ -594,6 +632,7 @@ class StreetAddressUsTest < MiniTest::Test
     assert_equal "St", a.street_type
   end
 
+
   def test_informal_parse_informal_address_trailing_words
     a = StreetAddress::US.parse("2730 S Veitch St in the south of arlington", informal: true)
     assert_equal "2730", a.number
@@ -601,6 +640,7 @@ class StreetAddressUsTest < MiniTest::Test
     assert_equal "Veitch", a.street
     assert_equal "St", a.street_type
   end
+
 
   def test_parse
     assert_nil StreetAddress::US.parse("&")
@@ -626,7 +666,6 @@ class StreetAddressUsTest < MiniTest::Test
     parseable.each do |location|
       assert(StreetAddress::US.parse(location), location + " was not parseable")
     end
-
   end
 
 

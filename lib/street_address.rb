@@ -753,20 +753,20 @@ module StreetAddress
 
       def parse_intersection(intersection, args)
         return unless match = intersection_regexp.match(intersection)
-
         hash = match_to_hash(match)
 
-        streets = intersection_regexp.named_captures["street"].map { |pos|
-          match[pos.to_i]
-        }.select { |v| v }
-        hash["street"]  = streets[0] if streets[0]
-        hash["street2"] = streets[1] if streets[1]
+        multiple_matches = Proc.new do |named_capture|
+          matches = intersection_regexp.named_captures[named_capture].map { |pos|
+            match[pos.to_i]
+          }.select { |v| v }
+          hash["#{named_capture}"]  = matches[0] if matches[0]
+          hash["#{named_capture}2"] = matches[1] if matches[1]
+        end
 
-        street_types = intersection_regexp.named_captures["street_type"].map { |pos|
-          match[pos.to_i]
-        }.select { |v| v }
-        hash["street_type"]  = street_types[0] if street_types[0]
-        hash["street_type2"] = street_types[1] if street_types[1]
+        multiple_matches.call('street')
+        multiple_matches.call('street_type')
+        multiple_matches.call('prefix')
+        multiple_matches.call('suffix')
 
         if(
           hash["street_type"] &&
@@ -840,6 +840,10 @@ module StreetAddress
 
           %w(street street_type street2 street_type2 city unit_prefix).each do |k|
             input[k] = input[k].split.map(&:capitalize).join(' ') if input[k]
+          end
+
+          %w(prefix prefix2 suffix suffix2 state).each do |k|
+            input[k] = input[k].upcase if input[k]
           end
 
           return StreetAddress::US::Address.new( input )
