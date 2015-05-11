@@ -1,5 +1,7 @@
+# coding: utf-8
 require 'minitest/autorun'
 require 'street_address'
+require 'pry-rescue/minitest'
 
 class StreetAddressUsTest < MiniTest::Test
   ADDRESSES = {
@@ -405,12 +407,24 @@ class StreetAddressUsTest < MiniTest::Test
       :state=>"NM",
       :postal_code=>"87120"
     },
-    "1234 Montaño NW #B Albuquerque NM 87120" => {
+    # Without Unicode
+    "1234 Montano NW #1 Albuquerque NM 87120" => {
+      :number=>"1234",
+      :street=>"Montano",
+      :suffix=> 'NW',
+      :unit=> '1',
+      :unit_prefix=> '#',
+      :city=>"Albuquerque",
+      :state=>"NM",
+      :postal_code=>"87120"
+    },
+    # With Unicode
+    "1234 Montaño NW #1 Albuquerque NM 87120" => {
       :number=>"1234",
       :street=>"Montaño",
       :suffix=> 'NW',
-      :unit=> 'B',
-      :unit_type=> '#',
+      :unit=> '1',
+      :unit_prefix=> '#',
       :city=>"Albuquerque",
       :state=>"NM",
       :postal_code=>"87120"

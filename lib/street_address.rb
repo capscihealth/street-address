@@ -423,7 +423,8 @@ module StreetAddress
       /stop/iu       => 'Stop',
       /su?i?te/iu    => 'Ste',
       /tra?i?le?r/iu => 'Trlr',
-      /uni?t/iu      => 'Unit'
+      /uni?t/iu      => 'Unit',
+      /#/            => '#'
     }
 
     UNIT_ABBREVIATIONS_UNNUMBERED = {
@@ -669,14 +670,9 @@ module StreetAddress
     )\b/iux
 
     self.unit_regexp = /
-      (?:
-          (?: (?:#{unit_prefix_numbered_regexp} [^\p{Word}]*)
-              | (?<unit_prefix> \#)[^\p{Word}]*
-          )
-          (?<unit> [\p{Word}-]+)
-      )
+      (?: #{unit_prefix_numbered_regexp} [^\p{Word}]* (?<unit> [\p{Word}-]+) )
       |
-      #{unit_prefix_unnumbered_regexp}
+      (?: #{unit_prefix_unnumbered_regexp} )
     /iux;
 
     self.city_and_state_regexp = /
