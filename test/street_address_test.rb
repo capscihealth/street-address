@@ -404,6 +404,16 @@ class StreetAddressUsTest < MiniTest::Test
       :city=>"Albuquerque",
       :state=>"NM",
       :postal_code=>"87120"
+    },
+    "1234 Montaño NW #B Albuquerque NM 87120" => {
+      :number=>"1234",
+      :street=>"Montaño",
+      :suffix=> 'NW',
+      :unit=> 'B',
+      :unit_type=> '#',
+      :city=>"Albuquerque",
+      :state=>"NM",
+      :postal_code=>"87120"
     }
   }
 
