@@ -428,7 +428,19 @@ class StreetAddressUsTest < MiniTest::Test
       :city=>"Albuquerque",
       :state=>"NM",
       :postal_code=>"87120"
-    }
+    },
+    # Unit is not a number (it is a free man)
+    "1234 Montano NW #B Albuquerque NM 87120" => {
+      :number=>"1234",
+      :street=>"Montano",
+      :suffix=> 'NW',
+      :unit=> 'B',
+      :unit_prefix=> '#',
+      :city=>"Albuquerque",
+      :state=>"NM",
+      :postal_code=>"87120"
+    },
+
   }
 
 

@@ -588,6 +588,7 @@ module StreetAddress
         :corner_regexp,
         :unit_regexp,
         :street_regexp,
+        :street_and_unit_regexp,
         :place_regexp,
         :address_regexp,
         :informal_address_regexp,
@@ -661,8 +662,7 @@ module StreetAddress
     self.unit_prefix_numbered_regexp = /
     (?<unit_prefix>
       #{UNIT_ABBREVIATIONS_NUMBERED.keys.join("|")}
-    )(?![a-z])/iux
-
+    )/iux
 
     self.unit_prefix_unnumbered_regexp = /
     (?<unit_prefix>
@@ -686,13 +686,22 @@ module StreetAddress
       (?:#{city_and_state_regexp}[^\p{Word}]*)? (?:#{zip_regexp})?
     /iux;
 
+    # Encourage the regexp to match a unit, else it might wind up
+    # as part of the city.
+    self.street_and_unit_regexp = /
+      (?:
+        (?: #{street_regexp} [^\p{Word}]+ (?:#{unit_regexp} [^\p{Word}]+) )
+        |
+        (?: #{street_regexp} [^\p{Word}]+ (?:#{unit_regexp} [^\p{Word}]+)? )
+      )
+    /iux;
+    
     self.address_regexp = /
       \A
       [^\p{Word}\x23]*    # skip non-word chars except # (eg unit)
       #{number_regexp} [^\p{Word}]*
       (?:#{fraction_regexp}[^\p{Word}]*)?
-      #{street_regexp}[^\p{Word}]+
-      (?:#{unit_regexp}[^\p{Word}]+)?
+      #{street_and_unit_regexp}
       #{place_regexp}
       [^\p{Word}]* # require on non-word chars at end
       \z           # right up to end of string
@@ -718,9 +727,7 @@ module StreetAddress
 
       \s+#{corner_regexp}\s+
 
-#          (?{ exists $_{$_} and $_{$_.1} = delete $_{$_} for (qw{prefix street type suffix})})
       #{street_regexp}[^\p{Word}]+
-#          (?{ exists $_{$_} and $_{$_.2} = delete $_{$_} for (qw{prefix street type suffix})})
 
       #{place_regexp}
       [^\p{Word}]*\z
