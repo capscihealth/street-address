@@ -401,41 +401,42 @@ module StreetAddress
     keys = STREET_NAME_ABBREVIATIONS.keys
     keys.each do |key|
       val = STREET_NAME_ABBREVIATIONS.delete(key)
-      new_key = /\b#{key}\b/i
+      new_key = /\b#{key}\b/iu
       STREET_NAME_ABBREVIATIONS[new_key] = val
     end
 
 
-    UNIT_ABBREVIATIONS_NUMBERED = {
-      /(?:ap|dep)(?:ar)?t(?:me?nt)?/i => 'Apt',
-      /box/i                 => 'Box',
-      /bu?i?ldi?n?g/i        => 'Bldg',
-      /dep(artmen)?t/i       => 'Dept',
-      /flo*r?/i              => 'Fl',
-      /Flr/i                 => 'Fl',
-      /ha?nga?r/i            => 'Hngr',
-      /lo?t/i                => 'Lot',
-      /ro*m/i                => 'Rm',
-      /pier/i                => 'Pier',
-      /p\W*[om]\W*b(?:ox)?/i => 'PO Box',
-      /slip/i       => 'Slip',
-      /spa?ce?/i    => 'Spc',
-      /stop/i       => 'Stop',
-      /su?i?te/i    => 'Ste',
-      /tra?i?le?r/i => 'Trlr',
-      /uni?t/i      => 'Unit'
+    UNIT_ABBREVIATIONS_WITH_UNIT = {
+      /(?:ap|dep)(?:ar)?t(?:me?nt)?/iu => 'Apt',
+      /box/iu                 => 'Box',
+      /bu?i?ldi?n?g/iu        => 'Bldg',
+      /dep(artmen)?t/iu       => 'Dept',
+      /flo*r?/iu              => 'Fl',
+      /Flr/iu                 => 'Fl',
+      /ha?nga?r/iu            => 'Hngr',
+      /lo?t/iu                => 'Lot',
+      /ro*m/iu                => 'Rm',
+      /pier/iu                => 'Pier',
+      /p[^\p{Word}]*[om][^\p{Word}]*b(?:ox)?/iu => 'PO Box',
+      /slip/iu       => 'Slip',
+      /spa?ce?/iu    => 'Spc',
+      /stop/iu       => 'Stop',
+      /su?i?te/iu    => 'Ste',
+      /tra?i?le?r/iu => 'Trlr',
+      /uni?t/iu      => 'Unit',
+      /#/            => '#'
     }
 
-    UNIT_ABBREVIATIONS_UNNUMBERED = {
-      /ba?se?me?n?t/i     => 'Bsmt',
-      /fro?nt/i => 'Frnt',
-      /lo?bby/i => 'Lbby',
-      /lowe?r/i => 'Lowr',
-      /off?i?ce?/i        => 'Ofc',
-      /pe?n?t?ho?u?s?e?/i => 'PH',
-      /rear/i   => 'Rear',
-      /side/i   => 'Side',
-      /uppe?r/i => 'Uppr',
+    UNIT_ABBREVIATIONS_WITHOUT_UNIT = {
+      /ba?se?me?n?t/iu     => 'Bsmt',
+      /fro?nt/iu => 'Frnt',
+      /lo?bby/iu => 'Lbby',
+      /lowe?r/iu => 'Lowr',
+      /off?i?ce?/iu        => 'Ofc',
+      /pe?n?t?ho?u?s?e?/iu => 'PH',
+      /rear/iu   => 'Rear',
+      /side/iu   => 'Side',
+      /uppe?r/iu => 'Uppr',
     }
 
 
@@ -587,12 +588,13 @@ module StreetAddress
         :corner_regexp,
         :unit_regexp,
         :street_regexp,
+        :street_and_unit_regexp,
         :place_regexp,
         :address_regexp,
         :informal_address_regexp,
         :dircode_regexp,
-        :unit_prefix_numbered_regexp,
-        :unit_prefix_unnumbered_regexp,
+        :unit_prefix_with_unit_regexp,
+        :unit_prefix_without_unit_regexp,
         :unit_regexp,
         :sep_regexp,
         :sep_avoid_unit_regexp,
@@ -602,7 +604,7 @@ module StreetAddress
 
     self.street_type_matches = {}
     STREET_TYPES.each_pair { |type,abbrv|
-      self.street_type_matches[abbrv] = /\b (?: #{abbrv}|#{Regexp.quote(type)} ) \b/ix
+      self.street_type_matches[abbrv] = /\b (?: #{abbrv}|#{Regexp.quote(type)} ) \b/iux
     }
 
     self.street_type_regexp = Regexp.new(STREET_TYPES_LIST.keys.join("|"), Regexp::IGNORECASE)
@@ -616,7 +618,7 @@ module StreetAddress
        DIRECTIONAL.values.sort { |a,b|
          b.length <=> a.length
        }.map { |c|
-         f = c.gsub(/(\w)/, '\1.')
+         f = c.gsub(/(\p{Word})/u, '\1.')
          [Regexp::quote(f), Regexp::quote(c)]
        }
       ).join("|"),
@@ -624,111 +626,112 @@ module StreetAddress
     )
     self.dircode_regexp = Regexp.new(DIRECTION_CODES.keys.join("|"), Regexp::IGNORECASE)
     self.zip_regexp     = /(?:(?<postal_code>\d{5})(?:-?(?<postal_code_ext>\d{4}))?)/
-    self.corner_regexp  = /(?:\band\b|\bat\b|&|\@)/i
+    self.corner_regexp  = /(?:\band\b|\bat\b|&|\@)/iu
 
     # we don't include letters in the number regex because we want to
     # treat "42S" as "42 S" (42 South). For example,
     # Utah and Wisconsin have a more elaborate system of block numbering
     # http://en.wikipedia.org/wiki/House_number#Block_numbers
-    self.number_regexp = /(?<number>\d+-?\d*)(?=\D)/ix
+    self.number_regexp = /(?<number>\d+-?\d*)(?=\D)/iux
 
     # note that expressions like [^,]+ may scan more than you expect
     self.street_regexp = /
       (?:
         # special case for addresses like 100 South Street
-        (?:(?<street> #{direct_regexp})\W+
+        (?:(?<street> #{direct_regexp})[^\p{Word}]+
            (?<street_type> #{street_type_regexp})\b
         )
         |
-        (?:(?<prefix> #{direct_regexp})\W+)?
+        (?:(?<prefix> #{direct_regexp})[^\p{Word}]+)?
         (?:
           (?<street> [^,]*\d)
-          (?:[^\w,]* (?<suffix> #{direct_regexp})\b)
+          (?:[^\p{Word},]* (?<suffix> #{direct_regexp})\b)
           |
           (?<street> [^,]+)
-          (?:[^\w,]+(?<street_type> #{street_type_regexp})\b)
-          (?:[^\w,]+(?<suffix> #{direct_regexp})\b)?
+          (?:[^\p{Word},]+(?<street_type> #{street_type_regexp})\b)
+          (?:[^\p{Word},]+(?<suffix> #{direct_regexp})\b)?
           |
           (?<street> [^,]+?)
-          (?:[^\w,]+(?<street_type> #{street_type_regexp})\b)?
-          (?:[^\w,]+(?<suffix> #{direct_regexp})\b)?
+          (?:[^\p{Word},]+(?<street_type> #{street_type_regexp})\b)?
+          (?:[^\p{Word},]+(?<suffix> #{direct_regexp})\b)?
         )
       )
-    /ix;
+    /iux;
 
     # http://pe.usps.com/text/pub28/pub28c2_003.htm
-    self.unit_prefix_numbered_regexp = /
+    self.unit_prefix_with_unit_regexp = /
     (?<unit_prefix>
-      #{UNIT_ABBREVIATIONS_NUMBERED.keys.join("|")}
-    )(?![a-z])/ix
+      #{UNIT_ABBREVIATIONS_WITH_UNIT.keys.join("|")}
+    )/iux
 
-
-    self.unit_prefix_unnumbered_regexp = /
+    self.unit_prefix_without_unit_regexp = /
     (?<unit_prefix>
-      #{UNIT_ABBREVIATIONS_UNNUMBERED.keys.join("|")}
-    )\b/ix
+      #{UNIT_ABBREVIATIONS_WITHOUT_UNIT.keys.join("|")}
+    )\b/iux
 
     self.unit_regexp = /
-      (?:
-          (?: (?:#{unit_prefix_numbered_regexp} \W*)
-              | (?<unit_prefix> \#)\W*
-          )
-          (?<unit> [\w-]+)
-      )
+      (?: #{unit_prefix_with_unit_regexp} [^\p{Word}]* (?<unit> [\p{Word}-]+) )
       |
-      #{unit_prefix_unnumbered_regexp}
-    /ix;
+      (?: #{unit_prefix_without_unit_regexp} )
+    /iux;
 
     self.city_and_state_regexp = /
       (?:
-          (?<city> [^\d,]+?)\W+
+          (?<city> [^\d,]+?)[^\p{Word}]+
           (?<state> #{state_regexp})
       )
-    /ix;
+    /iux;
 
     self.place_regexp = /
-      (?:#{city_and_state_regexp}\W*)? (?:#{zip_regexp})?
-    /ix;
+      (?:#{city_and_state_regexp}[^\p{Word}]*)? (?:#{zip_regexp})?
+    /iux;
 
+    # Encourage the regexp to match a unit, else it might wind up
+    # as part of the city.
+    self.street_and_unit_regexp = /
+      (?:
+        (?: #{street_regexp} [^\p{Word}]+ (?:#{unit_regexp} [^\p{Word}]+) )
+        |
+        (?: #{street_regexp} [^\p{Word}]+ (?:#{unit_regexp} [^\p{Word}]+)? )
+      )
+    /iux;
+    
     self.address_regexp = /
       \A
-      [^\w\x23]*    # skip non-word chars except # (eg unit)
-      #{number_regexp} \W*
-      (?:#{fraction_regexp}\W*)?
-      #{street_regexp}\W+
-      (?:#{unit_regexp}\W+)?
+      [^\p{Word}\x23]*    # skip non-word chars except # (eg unit)
+      #{number_regexp} [^\p{Word}]*
+      (?:#{fraction_regexp}[^\p{Word}]*)?
+      #{street_and_unit_regexp}
       #{place_regexp}
-      \W*         # require on non-word chars at end
+      [^\p{Word}]* # require on non-word chars at end
       \z           # right up to end of string
-    /ix;
+    /iux;
 
-    self.sep_regexp = /(?:\W+|\Z)/;
-    self.sep_avoid_unit_regexp = /(?:[^\#\w]+|\Z)/;
+    self.sep_regexp = /(?:[^\p{Word}]+|\Z)/;
+    self.sep_avoid_unit_regexp = /(?:[^\#\p{Word}]+|\Z)/;
 
     self.informal_address_regexp = /
       \A
       \s*         # skip leading whitespace
       (?:#{unit_regexp} #{sep_regexp})?
-      (?:#{number_regexp})? \W*
-      (?:#{fraction_regexp} \W*)?
+      (?:#{number_regexp})? [^\p{Word}]*
+      (?:#{fraction_regexp} [^\p{Word}]*)?
       #{street_regexp} #{sep_avoid_unit_regexp}
       (?:#{unit_regexp} #{sep_regexp})?
       (?:#{place_regexp})?
       # don't require match to reach end of string
-    /ix;
+    /iux;
 
-    self.intersection_regexp = /\A\W*
-      #{street_regexp}\W*?
+    self.intersection_regexp = /\A[^\p{Word}]*
+      #{street_regexp}[^\p{Word}]*?
 
       \s+#{corner_regexp}\s+
 
-#          (?{ exists $_{$_} and $_{$_.1} = delete $_{$_} for (qw{prefix street type suffix})})
-      #{street_regexp}\W+
-#          (?{ exists $_{$_} and $_{$_.2} = delete $_{$_} for (qw{prefix street type suffix})})
+      #{street_regexp}[^\p{Word}]+
 
       #{place_regexp}
-      \W*\z
-    /ix;
+      [^\p{Word}]*\z
+    /iux;
 
     class << self
       def parse(location, args={})
@@ -775,7 +778,7 @@ module StreetAddress
           )
         )
           type = hash["street_type"].clone
-          if( type.gsub!(/s\W*$/i, '') && /\A#{street_type_regexp}\z/i =~ type )
+          if( type.gsub!(/s[^\p{Word}]*$/i, '') && /\A#{street_type_regexp}\z/i =~ type )
             hash["street_type"] = hash["street_type2"] = type
           end
         end
@@ -805,7 +808,7 @@ module StreetAddress
           end
 
           ## abbreviate unit prefixes
-          UNIT_ABBREVIATIONS_NUMBERED.merge(UNIT_ABBREVIATIONS_UNNUMBERED).each_pair do |regex, abbr|
+          UNIT_ABBREVIATIONS_WITH_UNIT.merge(UNIT_ABBREVIATIONS_WITHOUT_UNIT).each_pair do |regex, abbr|
             regex.match(input['unit_prefix']){|m| input['unit_prefix'] = abbr }
           end
 
