@@ -406,7 +406,7 @@ module StreetAddress
     end
 
 
-    UNIT_ABBREVIATIONS_NUMBERED = {
+    UNIT_ABBREVIATIONS_WITH_UNIT = {
       /(?:ap|dep)(?:ar)?t(?:me?nt)?/iu => 'Apt',
       /box/iu                 => 'Box',
       /bu?i?ldi?n?g/iu        => 'Bldg',
@@ -427,7 +427,7 @@ module StreetAddress
       /#/            => '#'
     }
 
-    UNIT_ABBREVIATIONS_UNNUMBERED = {
+    UNIT_ABBREVIATIONS_WITHOUT_UNIT = {
       /ba?se?me?n?t/iu     => 'Bsmt',
       /fro?nt/iu => 'Frnt',
       /lo?bby/iu => 'Lbby',
@@ -593,8 +593,8 @@ module StreetAddress
         :address_regexp,
         :informal_address_regexp,
         :dircode_regexp,
-        :unit_prefix_numbered_regexp,
-        :unit_prefix_unnumbered_regexp,
+        :unit_prefix_with_unit_regexp,
+        :unit_prefix_without_unit_regexp,
         :unit_regexp,
         :sep_regexp,
         :sep_avoid_unit_regexp,
@@ -659,20 +659,20 @@ module StreetAddress
     /iux;
 
     # http://pe.usps.com/text/pub28/pub28c2_003.htm
-    self.unit_prefix_numbered_regexp = /
+    self.unit_prefix_with_unit_regexp = /
     (?<unit_prefix>
-      #{UNIT_ABBREVIATIONS_NUMBERED.keys.join("|")}
+      #{UNIT_ABBREVIATIONS_WITH_UNIT.keys.join("|")}
     )/iux
 
-    self.unit_prefix_unnumbered_regexp = /
+    self.unit_prefix_without_unit_regexp = /
     (?<unit_prefix>
-      #{UNIT_ABBREVIATIONS_UNNUMBERED.keys.join("|")}
+      #{UNIT_ABBREVIATIONS_WITHOUT_UNIT.keys.join("|")}
     )\b/iux
 
     self.unit_regexp = /
-      (?: #{unit_prefix_numbered_regexp} [^\p{Word}]* (?<unit> [\p{Word}-]+) )
+      (?: #{unit_prefix_with_unit_regexp} [^\p{Word}]* (?<unit> [\p{Word}-]+) )
       |
-      (?: #{unit_prefix_unnumbered_regexp} )
+      (?: #{unit_prefix_without_unit_regexp} )
     /iux;
 
     self.city_and_state_regexp = /
@@ -808,7 +808,7 @@ module StreetAddress
           end
 
           ## abbreviate unit prefixes
-          UNIT_ABBREVIATIONS_NUMBERED.merge(UNIT_ABBREVIATIONS_UNNUMBERED).each_pair do |regex, abbr|
+          UNIT_ABBREVIATIONS_WITH_UNIT.merge(UNIT_ABBREVIATIONS_WITHOUT_UNIT).each_pair do |regex, abbr|
             regex.match(input['unit_prefix']){|m| input['unit_prefix'] = abbr }
           end
 
