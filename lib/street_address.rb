@@ -741,7 +741,6 @@ module StreetAddress
 
       def parse_address(address, args={})
         return unless match = address_regexp.match(address)
-
         to_address( match_to_hash(match), args )
       end
 
@@ -795,7 +794,7 @@ module StreetAddress
           # strip off some punctuation and whitespace
           input.values.each { |string|
             string.strip!
-            string.gsub!(/[^\w\s\-\#\&]/, '')
+            string.gsub!(/[^\p{Word}\s\-\#\&]/, '')
           }
 
           input['redundant_street_type'] = false
@@ -942,9 +941,9 @@ module StreetAddress
         s = ""
         case format
         when :line1
-          s << line1(s)
+          s << line1
         when :line2
-          s << line2(s)
+          s << line2
         else
           s << [line1, line2].select{ |l| !l.empty? }.join(', ')
         end

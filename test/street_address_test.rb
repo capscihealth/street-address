@@ -375,6 +375,35 @@ class StreetAddressUsTest < MiniTest::Test
       :state=>"VA",
       :postal_code=>"22206",
       :postal_code_ext=>nil
+    },
+    "1510 S Saint Francis Dr Santa Fe NM 87505" => {
+      :number=>"1510",
+      :street=>"Saint Francis",
+      :street_type=>"Dr",
+      :postal_code=>"87505",
+      :prefix=>"S",
+      :city=>"Santa Fe",
+      :state=>"NM"
+    },
+    #FIXME: if there is no comma, this fails to parse; ideally it should match
+    #the fist street type, but starting from the end, not the front
+    "1234 S St Francis Dr, Santa Fe NM 87505" => { #Saint is abbreviated
+      :number=>"1234",
+      :street=>"St Francis",
+      :street_type=>"Dr",
+      :postal_code=>"87505",
+      :prefix=>"S",
+      :city=>"Santa Fe",
+      :state=>"NM"
+    },
+    "1234 Montaño Rd NW, Albuquerque, NM 87120" => {
+      :number=>"1234",
+      :street=>"Montaño",
+      :street_type=>"Rd",
+      :suffix=> 'NW',
+      :city=>"Albuquerque",
+      :state=>"NM",
+      :postal_code=>"87120"
     }
   }
 
@@ -545,7 +574,7 @@ class StreetAddressUsTest < MiniTest::Test
     "1005 N Gravenstein Hwy Sebastopol CZ",
     "Gravenstein Hwy 95472",
     "E1005 Gravenstein Hwy 95472",
-    # "1005E Gravenstein Hwy 95472"
+    "1005E Gravenstein Hwy 95472",
     ## adding from original ruby test suite
     "PO BOX 450, Chicago IL 60657"
   ]
