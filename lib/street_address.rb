@@ -695,7 +695,7 @@ module StreetAddress
         (?: #{street_regexp} [^\p{Word}]+ (?:#{unit_regexp} [^\p{Word}]+)? )
       )
     /iux;
-    
+
     self.address_regexp = /
       \A
       [^\p{Word}\x23]*    # skip non-word chars except # (eg unit)
@@ -795,9 +795,15 @@ module StreetAddress
 
         def to_address(input, args)
           # strip off some punctuation and whitespace
-          input.values.each { |string|
+          base_strip_regex = /\p{Word}\s\-\#\&/
+          input.each_pair { |k, string|
             string.strip!
-            string.gsub!(/[^\p{Word}\s\-\#\&]/, '')
+            #don't strip out periods from names just yet
+            if k == 'street'
+              string.gsub!(/[^#{base_strip_regex}\.]/, '')
+            else
+              string.gsub!(/[^#{base_strip_regex}]/, '')
+            end
           }
 
           input['redundant_street_type'] = false
@@ -848,6 +854,9 @@ module StreetAddress
             input[k] = input[k].upcase if input[k]
           end
 
+          # lets stip periods off of everything; for street names lets make sure
+          # abbreviations stay appropriately capitalized
+          input['street'].gsub!(/(\w)\./){|m| $1.upcase}
           return StreetAddress::US::Address.new( input )
         end
     end

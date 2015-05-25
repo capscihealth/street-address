@@ -1,7 +1,5 @@
-# coding: utf-8
 require 'minitest/autorun'
 require 'street_address'
-require 'pry-rescue/minitest'
 
 class StreetAddressUsTest < MiniTest::Test
   ADDRESSES = {
@@ -440,6 +438,30 @@ class StreetAddressUsTest < MiniTest::Test
       :state=>"NM",
       :postal_code=>"87120"
     },
+    # FIXME: Lower gets matched as a unit
+    # '1234 N Bethlehem Pike, Lower Gwynedd, PA 19002' => {
+    #   :number=>"1234",
+    #   :street=>"Bethlehem",
+    #   :street_type=>"Pike",
+    #   :prefix=>"N",
+    #   :city=>"Lower Gwynedd",
+    #   :state=>"PA",
+    #   :postal_code=>"19002"
+    # },
+    # the periods should be gone, but the street name should
+    # remain in all-caps
+    '316 M.L.K. Jr Way #212, Tacoma, WA 98405' => {
+      :number=>"316",
+      :prefix=>nil,
+      :street=>"MLK Jr",
+      :street_type=>"Way",
+      :suffix=>nil,
+      :unit=>"212",
+      :unit_prefix=>"#",
+      :city=>"Tacoma",
+      :state=>"WA",
+      :postal_code=>"98405"
+    }
 
   }
 
