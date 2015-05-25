@@ -854,9 +854,12 @@ module StreetAddress
             input[k] = input[k].upcase if input[k]
           end
 
-          # lets stip periods off of everything; for street names lets make sure
+          # periods have been stripped from everything except street names
           # abbreviations stay appropriately capitalized
-          input['street'].gsub!(/(\w)\./){|m| $1.upcase}
+          # but if there are two letters ending in a period, such as 'Jr.',
+          # lets leave it as 'Jr' and not make it 'JR'
+          input['street'].gsub!(/\b(\w)\./){|m| $1.upcase}
+          input['street'].gsub!('.', '')
           return StreetAddress::US::Address.new( input )
         end
     end

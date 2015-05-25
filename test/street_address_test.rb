@@ -450,7 +450,7 @@ class StreetAddressUsTest < MiniTest::Test
     # },
     # the periods should be gone, but the street name should
     # remain in all-caps
-    '316 M.L.K. Jr Way #212, Tacoma, WA 98405' => {
+    '316 M.L.K. Jr. Way #212, Tacoma, WA 98405' => {
       :number=>"316",
       :prefix=>nil,
       :street=>"MLK Jr",
