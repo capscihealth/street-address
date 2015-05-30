@@ -395,7 +395,7 @@ module StreetAddress
       'fifth'   => '5th',
       'sixth'   => '6th',
       'seventh' => '7th',
-      'eight'   => '8th',
+      'eighth'  => '8th',
       'ninth'   => '9th',
     }
     keys = STREET_NAME_ABBREVIATIONS.keys
@@ -586,7 +586,6 @@ module StreetAddress
         :direct_regexp,
         :zip_regexp,
         :corner_regexp,
-        :unit_regexp,
         :street_regexp,
         :street_and_unit_regexp,
         :place_regexp,
