@@ -461,7 +461,19 @@ class StreetAddressUsTest < MiniTest::Test
       :city=>"Tacoma",
       :state=>"WA",
       :postal_code=>"98405"
-    }
+    },
+    # NOTE: this should really be unit => 132, but
+    # we can't fully pull it out.  But we don't want this
+    # to fail either
+    "1 OAK GROVE AVE 132, MELROSE, MA 021766121" => {
+      :city => "Melrose",
+      :number => "1",
+      :postal_code => "02176",
+      :postal_code_ext => "6121",
+      :state => "MA",
+      :street => "Oak Grove Ave 132",
+      :street_type => "Ave"
+     }
 
   }
 
@@ -623,6 +635,11 @@ class StreetAddressUsTest < MiniTest::Test
       :street_type => 'Dr',
       :prefix => 'S',
       :unit_prefix => 'Lbby',
+    },
+    # missing a street
+    "1 DOYLESTOWN, PA 18901" => {
+      :number => '1',
+      :street => 'Doylestown'
     }
   }
 

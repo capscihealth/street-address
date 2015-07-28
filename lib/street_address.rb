@@ -788,13 +788,14 @@ module StreetAddress
       private
         def match_to_hash(match)
           hash = {}
-          match.names.each { |name| hash[name] = match[name] if match[name] }
+          match.names.each { |name| hash[name] = match[name] if match[name] && !match[name].strip.empty? }
           return hash
         end
 
         def to_address(input, args)
           # strip off some punctuation and whitespace
           base_strip_regex = /\p{Word}\s\-\#\&/
+          input = input.clone
           input.each_pair { |k, string|
             string.strip!
             #don't strip out periods from names just yet
@@ -804,6 +805,7 @@ module StreetAddress
               string.gsub!(/[^#{base_strip_regex}]/, '')
             end
           }
+          input.delete_if{|k, string| string.nil? || string.empty?}
 
           input['redundant_street_type'] = false
           if( input['street'] && !input['street_type'] )
@@ -813,12 +815,16 @@ module StreetAddress
           end
 
           ## abbreviate unit prefixes
-          UNIT_ABBREVIATIONS_WITH_UNIT.merge(UNIT_ABBREVIATIONS_WITHOUT_UNIT).each_pair do |regex, abbr|
-            regex.match(input['unit_prefix']){|m| input['unit_prefix'] = abbr }
+          if input['unit_prefix']
+            UNIT_ABBREVIATIONS_WITH_UNIT.merge(UNIT_ABBREVIATIONS_WITHOUT_UNIT).each_pair do |regex, abbr|
+              regex.match(input['unit_prefix']){|m| input['unit_prefix'] = abbr }
+            end
           end
 
-          STREET_NAME_ABBREVIATIONS.each_pair do |regex, abbr|
-            input['street'].sub!(regex, abbr)
+          if input['street']
+            STREET_NAME_ABBREVIATIONS.each_pair do |regex, abbr|
+              input['street'].sub!(regex, abbr)
+            end
           end
 
           NORMALIZE_MAP.each_pair { |key, map|
@@ -857,8 +863,10 @@ module StreetAddress
           # abbreviations stay appropriately capitalized
           # but if there are two letters ending in a period, such as 'Jr.',
           # lets leave it as 'Jr' and not make it 'JR'
-          input['street'].gsub!(/\b(\w)\./){|m| $1.upcase}
-          input['street'].gsub!('.', '')
+          if input['street']
+            input['street'].gsub!(/\b(\w)\./){|m| $1.upcase}
+            input['street'].gsub!('.', '')
+          end
           return StreetAddress::US::Address.new( input )
         end
     end
