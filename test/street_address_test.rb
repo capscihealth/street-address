@@ -473,7 +473,21 @@ class StreetAddressUsTest < MiniTest::Test
       :state => "MA",
       :street => "Oak Grove Ave 132",
       :street_type => "Ave"
-     }
+    },
+
+    # handle corridors as a unit type
+    "5801 Army Pentagon Corridor 8, Washington, DC 20310-5801" => {
+      :number => "5801",
+      :street => "Army Pentagon",
+      :street_type => nil,
+      :unit => "8",
+      :unit_prefix => "Cor",
+      :city => "Washington",
+      :state => "DC",
+      :postal_code => "20310",
+      :postal_code_ext => "5801"
+    }
+
 
   }
 

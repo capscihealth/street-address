@@ -410,6 +410,7 @@ module StreetAddress
       /(?:ap|dep)(?:ar)?t(?:me?nt)?/iu => 'Apt',
       /box/iu                 => 'Box',
       /bu?i?ldi?n?g/iu        => 'Bldg',
+      /Corr?idor/iu           => 'Cor',
       /dep(artmen)?t/iu       => 'Dept',
       /flo*r?/iu              => 'Fl',
       /Flr/iu                 => 'Fl',
